@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Детективное агентство «Текст» — интерактивная игра по русскому языку (4 класс)</title>
+<link rel="icon" href="data:,">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg1:#10162b;--bg2:#1b2547;--panel:#202c52;--amber:#ffc93c;--amber2:#ffb300;--paper:#fffdf4;--ink:#2b2117;--green:#27c46f;--red:#ff6b6b;--txt:#eaf0ff;--muted:#9fb0d8}
+html,body{margin:0;padding:0}
+body{font-family:'Trebuchet MS','Segoe UI',Verdana,sans-serif;background:radial-gradient(1200px 600px at 20% -10%,#22315e 0,transparent 60%),radial-gradient(900px 500px at 110% 10%,#2a1f4d 0,transparent 55%),linear-gradient(160deg,var(--bg1),var(--bg2));min-height:100vh;color:var(--txt);background-attachment:fixed}
+button{font-family:inherit}
+
+header.app{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:12px;padding:10px 16px;background:rgba(13,18,38,.88);backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,.08);flex-wrap:wrap}
+.logo{font-weight:bold;font-size:16px;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.logo .badge{background:var(--amber);color:#3a2a00;padding:3px 8px;border-radius:999px;font-size:15px}
+.dots{display:flex;gap:6px;align-items:center}
+.dot{width:13px;height:13px;border-radius:50%;background:#39466f;border:2px solid #55679c}
+.dot.done{background:var(--green);border-color:var(--green)}
+.dot.cur{background:var(--amber);border-color:#fff;box-shadow:0 0 8px var(--amber)}
+.parts{margin-left:auto;display:flex;align-items:center;gap:8px}
+.robotmini{font-size:18px}
+.slots{display:flex;gap:4px;flex-wrap:wrap;max-width:280px}
+.slot{width:22px;height:22px;border-radius:50%;background:#2b3866;border:1px dashed #55679c;display:flex;align-items:center;justify-content:center;font-size:12px}
+.slot.full{background:#3d2f0a;border:1px solid var(--amber)}
+.partscount{font-size:14px;color:var(--amber);font-weight:bold;white-space:nowrap}
+.iconbtn{width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:#fff;font-size:17px;cursor:pointer}
+.iconbtn:hover{background:rgba(255,255,255,.16)}
+
+main{max-width:900px;margin:0 auto;padding:18px 14px 70px}
+.screen{display:none;animation:fadeIn .35s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.center{text-align:center;margin-top:16px}
+
+.hero{text-align:center;padding:26px 10px 8px}
+.hero-emoji{font-size:46px}
+.hero h1{font-family:'Comic Sans MS','Trebuchet MS',cursive,sans-serif;font-size:30px;margin:10px 0 6px;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.35)}
+.hero .sub{color:var(--muted);font-size:15px}
+
+.storycard{background:var(--panel);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:20px 22px;margin:18px auto;max-width:660px;box-shadow:0 12px 30px rgba(0,0,0,.35);font-size:15.5px;line-height:1.7}
+.storycard p{margin:8px 0}
+.villain-mini{display:flex;align-items:center;gap:10px;background:rgba(255,107,107,.1);border:1px dashed rgba(255,107,107,.45);border-radius:12px;padding:8px 12px;margin-bottom:12px;font-size:14px}
+.howto{text-align:left;margin:12px 0 4px;padding-left:20px;font-size:14.5px;color:#dbe4ff;line-height:1.8}
+.howto li{margin:4px 0}
+
+.btn{display:inline-block;border:none;cursor:pointer;font-weight:bold;font-size:18px;color:#3a2a00;background:linear-gradient(180deg,#ffd968,var(--amber2));border-radius:12px;padding:12px 26px;box-shadow:0 5px 0 #b98700,0 10px 18px rgba(0,0,0,.35);transition:transform .12s;margin:4px 6px}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #b98700}
+.btn.ghosty{background:transparent;color:var(--txt);border:2px solid #55679c;box-shadow:none;font-size:15px;padding:9px 18px}
+.btn.small{font-size:15px;padding:9px 20px;box-shadow:0 3px 0 #b98700}
+.btn.ghosty.small{box-shadow:none}
+
+.boss-ghost{position:relative;flex:0 0 auto;width:40px;height:48px;background:rgba(255,255,255,.16);border-radius:20px 20px 8px 8px;animation:float 2.4s ease-in-out infinite}
+.boss-ghost::before,.boss-ghost::after{content:'';position:absolute;top:14px;width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 6px var(--red)}
+.boss-ghost::before{left:10px}
+.boss-ghost::after{right:10px}
+@keyframes float{50%{transform:translateY(-6px)}}
+
+.casehead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-top:6px;flex-wrap:wrap}
+.casecode{color:var(--amber);font-weight:bold;letter-spacing:.15em;font-size:13px}
+.casehead h2{margin:2px 0 0;font-size:24px;font-family:'Comic Sans MS','Trebuchet MS',cursive,sans-serif}
+.topic{background:rgba(255,201,60,.12);border:1px solid rgba(255,201,60,.4);color:var(--amber);padding:6px 12px;border-radius:999px;font-size:13px}
+.story{color:var(--muted);margin:10px 2px;font-size:15px;line-height:1.6}
+.bossline{display:flex;align-items:center;gap:12px;background:rgba(255,80,80,.08);border:1px dashed rgba(255,110,110,.5);padding:10px 14px;border-radius:12px;margin:10px 0;font-size:14.5px;color:#ffc9c9}
+
+.rulebar{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;margin:10px 0 16px}
+.rulebar summary{cursor:pointer;padding:10px 14px;font-weight:bold;color:var(--amber);list-style:none;outline:none}
+.rulebar summary::-webkit-details-marker{display:none}
+.rulebar summary::before{content:'▸ '}
+.rulebar[open] summary::before{content:'▾ '}
+.rulebar #ruleText{padding:0 14px 12px;font-size:14.5px;color:#dbe4ff;line-height:1.6}
+
+.paper{background:var(--paper);color:var(--ink);border-radius:14px;padding:26px 26px 30px;font-family:Georgia,'Times New Roman',serif;font-size:clamp(16px,2.6vw,21px);line-height:2.15;box-shadow:0 14px 34px rgba(0,0,0,.4);position:relative}
+.paper::before{content:'';position:absolute;left:42px;top:0;bottom:0;width:2px;background:rgba(255,80,80,.3)}
+.stamp{position:absolute;top:12px;right:14px;transform:rotate(7deg);border:3px double var(--red);color:var(--red);font-weight:bold;padding:2px 10px;border-radius:6px;font-family:'Trebuchet MS',sans-serif;font-size:12px;letter-spacing:.08em;opacity:.85;background:rgba(255,255,255,.6);pointer-events:none}
+.paper.shake{animation:shake .45s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+
+.gap{display:inline-flex;align-items:center;justify-content:center;min-width:1.3em;height:1.4em;padding:0 .12em;margin:0 .05em;border:2px dashed #c9a227;background:#fff8dc;border-radius:8px;vertical-align:middle;cursor:pointer;position:relative;font-family:'Trebuchet MS',sans-serif;font-weight:bold;font-size:.92em;transition:transform .15s,background .2s,border-color .2s;line-height:1}
+.gap:hover{border-color:var(--amber2)}
+.gap.hover{transform:scale(1.12);border-color:var(--green);background:#eafff3}
+.gap.filled{border-style:solid;border-color:var(--green);background:#e9fff2;color:#0e6b3c;animation:pop .3s}
+.gap.wrongflash{animation:wrongflash .5s}
+@keyframes pop{0%{transform:scale(.5)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes wrongflash{0%,100%{transform:translateX(0)}25%{border-color:var(--red);background:#ffe9e9;transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.gap .g-text{min-width:.9em;text-align:center}
+.gap:not(.filled) .g-text::after{content:'?';opacity:.4;font-weight:normal}
+.gap .lupa{position:absolute;top:-10px;right:-9px;width:21px;height:21px;border-radius:50%;background:#fff;border:1px solid #d0a900;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,.25)}
+.gap .lupa:hover{transform:scale(1.15)}
+
+.statusbar{display:flex;align-items:center;gap:8px;min-height:32px;margin:14px 2px 10px;color:var(--muted);font-size:15px}
+.statusbar.good{color:#7dffb0}
+.statusbar.bad{color:#ffb3b3}
+
+.warehouse{background:linear-gradient(180deg,#2b3768,#232f5c);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 16px 16px;box-shadow:inset 0 2px 12px rgba(0,0,0,.35);position:sticky;bottom:10px;z-index:40}
+.warehouse h3{margin:0 0 10px;font-size:13px;letter-spacing:.14em;color:var(--amber);text-transform:uppercase}
+.chips{display:flex;flex-wrap:wrap;gap:10px;min-height:52px}
+.chip{width:50px;height:50px;border-radius:12px;background:linear-gradient(180deg,#ffd968,var(--amber2));color:#3a2a00;font-size:23px;font-weight:bold;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 0 #b98700,0 8px 16px rgba(0,0,0,.35);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;transition:transform .12s;line-height:1}
+.chip:active{cursor:grabbing}
+.chip.dragging{opacity:.25}
+.chip.selected{transform:translateY(-4px) scale(1.07);box-shadow:0 0 0 3px #fff,0 6px 0 #b98700}
+.chip.used{display:none}
+.ghost{position:fixed;z-index:1000;pointer-events:none;width:52px;height:52px;border-radius:12px;background:linear-gradient(180deg,#ffd968,var(--amber2));color:#3a2a00;font-size:23px;font-weight:bold;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 26px rgba(0,0,0,.5);transform:translate(-50%,-58%) scale(1.1);line-height:1}
+
+.hintpop{position:absolute;z-index:300;background:#33406f;color:#fff;border:1px solid var(--amber);border-radius:10px;padding:10px 13px;max-width:270px;font-size:14px;line-height:1.5;box-shadow:0 12px 26px rgba(0,0,0,.5);animation:fadeIn .2s}
+.hintpop b{color:var(--amber);display:block;margin-bottom:4px;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase}
+
+.overlay{position:fixed;inset:0;background:rgba(8,11,26,.74);display:none;align-items:center;justify-content:center;z-index:200;padding:16px}
+.overlay.show{display:flex}
+.card{background:var(--paper);color:var(--ink);border-radius:16px;max-width:540px;width:100%;padding:24px;text-align:center;animation:pop .35s;box-shadow:0 24px 60px rgba(0,0,0,.5);max-height:92vh;overflow:auto}
+.card h2{margin:4px 0 10px;color:#5a4300}
+.card.left{text-align:left;max-width:620px}
+.card.left ul{font-size:14.5px;line-height:1.75;color:#333;padding-left:20px;margin:10px 0}
+.card.left li{margin:8px 0}
+.schemeTitle{margin:6px 0 0;font-size:15px;color:#8a6a00}
+.scheme{background:#f4f7ff;border:2px dashed #b9c6ee;border-radius:12px;padding:14px;margin:10px 0 12px;font-family:'Trebuchet MS',sans-serif;font-size:16px;line-height:1.9;color:#222}
+.scheme .tok{display:inline-block;background:#fff;border:2px solid #8fa3d8;border-radius:8px;padding:2px 10px;margin:2px;font-weight:bold}
+.scheme .comma{color:#c0392b;font-weight:bold;font-size:22px;padding:0 4px}
+.scheme .bigA{font-size:26px;color:#c0392b;font-weight:bold;padding:0 6px}
+.scheme .arr{color:#667;font-size:20px}
+.scheme .str{color:#c0392b}
+.scheme-note{margin-top:8px;font-size:13.5px;color:#555}
+.donetext{font-size:15px;color:#333;line-height:1.6}
+.partsfly{display:flex;justify-content:center;gap:12px;margin:10px 0}
+.partsfly .pf{font-size:36px;animation:pop .5s backwards}
+.partsnote{font-size:14px;color:#8a6a00;font-weight:bold}
+
+.schemetoast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:var(--paper);color:var(--ink);border-radius:14px;padding:12px 18px;z-index:250;box-shadow:0 16px 40px rgba(0,0,0,.5);max-width:min(92vw,500px);text-align:center;animation:schemepop .3s}
+.schemetoast h4{margin:0 0 8px;font-size:14px;color:#8a6a00}
+.schemetoast.bye{opacity:0;transition:opacity .45s}
+@keyframes schemepop{from{transform:translateX(-50%) translateY(20px);opacity:0}}
+
+.robot{margin:16px auto 6px;width:170px;text-align:center;animation:pop .6s}
+.r-antenna{width:4px;height:24px;background:#9fb0d8;margin:0 auto;position:relative}
+.r-antenna::before{content:'';position:absolute;top:-13px;left:-6px;width:16px;height:16px;border-radius:50%;background:var(--red);box-shadow:0 0 12px var(--red);animation:blink 1.2s infinite}
+.r-head{width:130px;height:90px;margin:0 auto;background:linear-gradient(180deg,#cfe0ff,#9fb6ee);border-radius:26px;display:flex;align-items:center;justify-content:center;gap:18px;box-shadow:inset 0 -6px 12px rgba(0,0,0,.15),0 10px 24px rgba(0,0,0,.4)}
+.r-eye{width:22px;height:26px;border-radius:8px;background:#0d1b2a;position:relative}
+.r-eye::after{content:'';position:absolute;left:5px;top:6px;width:8px;height:10px;border-radius:4px;background:#54ffb2;box-shadow:0 0 8px #54ffb2;animation:blink 2.6s infinite}
+.r-body{width:150px;height:112px;margin:6px auto 0;background:linear-gradient(180deg,#8ea6e6,#6f89cf);border-radius:18px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -8px 14px rgba(0,0,0,.2)}
+.r-slots{display:grid;grid-template-columns:repeat(5,26px);gap:4px}
+.r-slots span{width:26px;height:26px;background:rgba(255,255,255,.28);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.r-legs{display:flex;justify-content:center;gap:26px}
+.r-legs span{width:26px;height:14px;background:#6f89cf;border-radius:0 0 8px 8px}
+@keyframes blink{0%,90%,100%{opacity:1}95%{opacity:.15}}
+
+.certificate{background:#fff;color:#232323;max-width:560px;margin:18px auto;border:6px double var(--amber2);border-radius:14px;padding:22px 26px;text-align:center;font-family:Georgia,'Times New Roman',serif}
+.cert-head{font-size:24px;letter-spacing:.2em;font-weight:bold;color:#8a6a00}
+.cert-sub{color:#777;margin-bottom:8px;letter-spacing:.12em}
+.cert-name{font-size:26px;border-bottom:2px solid #caa93c;display:inline-block;padding:0 18px 4px;margin:6px 0 10px;min-width:200px}
+#nameInput{display:block;margin:8px auto 0;padding:8px 12px;border-radius:8px;border:2px dashed #caa93c;font-size:16px;text-align:center;width:230px;font-family:inherit}
+.cert-text{font-size:15px;line-height:1.65;color:#444}
+.cert-foot{display:flex;justify-content:space-between;color:#666;font-size:13px;border-top:1px solid #eee;padding-top:8px;margin-top:10px;gap:10px}
+
+.confetti-piece{position:fixed;top:-24px;z-index:500;border-radius:2px;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(112vh) rotate(680deg)}}
+
+@media (max-width:640px){
+  .hero h1{font-size:23px}
+  .casehead h2{font-size:20px}
+  .paper{padding:22px 16px 24px}
+  .paper::before{left:24px}
+  .chip{width:46px;height:46px;font-size:21px}
+  .slots{max-width:160px}
+  .logo-text{display:none}
+}
+@media print{
+  body *{visibility:hidden !important}
+  #certificate,#certificate *{visibility:visible !important}
+  #certificate{position:fixed;left:0;top:0;width:100%;margin:0;box-shadow:none;border-color:#caa93c}
+  #nameInput{display:none}
+}
+</style>
+</head>
+<body>
+<header class="app">
+  <div class="logo"><span class="badge">🕵️</span><span class="logo-text">Агентство «Текст»</span></div>
+  <div class="dots" id="dots"></div>
+  <div class="parts">
+    <span class="robotmini" title="Робот Бип">🤖</span>
+    <div class="slots" id="slots"></div>
+    <span id="partsCount" class="partscount">0/10</span>
+  </div>
+  <button class="iconbtn" id="sndBtn" title="Звук вкл/выкл">🔊</button>
+  <button class="iconbtn" id="helpBtn" title="Методичка для учителя">📖</button>
+</header>
+
+<main>
+  <!-- ЭКРАН 1: ИНТРО -->
+  <section id="screen-intro" class="screen active">
+    <div class="hero">
+      <div class="hero-emoji">🕵️🔍</div>
+      <h1>Детективное агентство «Текст»</h1>
+      <div class="sub">Русский язык · 4 класс · интерактивное расследование</div>
+    </div>
+    <div class="storycard">
+      <div class="villain-mini"><div class="boss-ghost"></div><span><b>Ошибка-Невидимка</b> снова в деле!</span></div>
+      <p>Ночью хакер <b>Ошибка-Невидимка</b> проник в школьную базу данных и испортил все тексты: буквы выпали, запятые пропали, мягкие знаки разбежались!</p>
+      <p>Ты — детектив агентства «Текст». Бери <b>детали со склада</b> и вставляй их в <b>пропуски</b> сломанного текста. За каждое закрытое дело робот <b>Бип</b> 🤖 получает запчасти: собери все <b>10 деталей</b> — и он снова выйдет на стражу чистоты текстов!</p>
+      <ul class="howto">
+        <li>🖱️ Перетащи деталь из склада в пропуск текста (или нажми деталь, а потом пропуск)</li>
+        <li>🔍 Нажми на пропуск — лупа покажет проверочное слово, но не готовый ответ!</li>
+        <li>❤️ Ошибиться не страшно: неправильная деталь просто вернётся на склад</li>
+      </ul>
+      <div class="center"><button class="btn" id="startBtn">🔍 Начать расследование</button></div>
+    </div>
+  </section>
+
+  <!-- ЭКРАН 2: ДЕЛО -->
+  <section id="screen-level" class="screen">
+    <div class="casehead">
+      <div>
+        <div class="casecode" id="caseCode">ДЕЛО № 1</div>
+        <h2 id="caseTitle">…</h2>
+      </div>
+      <span class="topic" id="caseTopic">…</span>
+    </div>
+    <div class="story" id="caseStory">…</div>
+    <div class="bossline" id="bossline" style="display:none"><div class="boss-ghost"></div><span id="bossSay">…</span></div>
+    <details class="rulebar" open>
+      <summary>📜 Правило-напоминание</summary>
+      <div id="ruleText">…</div>
+    </details>
+    <div class="paper" id="paper">
+      <div class="stamp" id="stamp">ИСПОРЧЕНО</div>
+      <div id="paperText"></div>
+    </div>
+    <div class="statusbar" id="status">…</div>
+    <div class="warehouse">
+      <h3>📦 Склад деталей</h3>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="center"><button class="btn ghosty small" id="toMenuBtn">← В агентство</button></div>
+  </section>
+
+  <!-- ЭКРАН 3: ФИНАЛ -->
+  <section id="screen-final" class="screen">
+    <div class="hero">
+      <div class="hero-emoji">🎉🤖🎉</div>
+      <h1>База восстановлена!</h1>
+      <div class="sub">Ты собрал все 10 деталей — робот Бип снова на страже чистоты текстов!</div>
+    </div>
+    <div class="robot">
+      <div class="r-antenna"></div>
+      <div class="r-head"><div class="r-eye"></div><div class="r-eye"></div></div>
+      <div class="r-body"><div class="r-slots" id="robotSlots"></div></div>
+      <div class="r-legs"><span></span><span></span></div>
+    </div>
+    <div class="certificate" id="certificate">
+      <div class="cert-head">УДОСТОВЕРЕНИЕ</div>
+      <div class="cert-sub">детектива текста</div>
+      <div class="cert-name" id="certName">Детектив</div>
+      <input id="nameInput" maxlength="24" placeholder="Впиши своё имя">
+      <p class="cert-text">разоблачил(а) хакера Ошибку-Невидимку, восстановил(а) все документы школьной базы и вернул(а) робота Бипа в строй.</p>
+      <div class="cert-foot"><span id="certDate">…</span><span>Агентство «Текст» 🕵️</span></div>
+    </div>
+    <div class="center">
+      <button class="btn" id="printBtn">🖨️ Распечатать удостоверение</button>
+      <button class="btn ghosty" id="againBtn">🔄 Новое расследование</button>
+    </div>
+  </section>
+</main>
+
+<!-- ОВЕРЛЕЙ: окончание дела -->
+<div class="overlay" id="overlay"><div class="card" id="overlayCard"></div></div>
+
+<!-- ОВЕРЛЕЙ: методичка для учителя -->
+<div class="overlay" id="helpOverlay">
+  <div class="card left">
+    <h2>📖 Методичка для учителя</h2>
+    <ul>
+      <li><b>Класс:</b> 4 (УМК «Школа России»). Время: 15–20 минут, индивидуально или в парах, удобно для интерактивной доски.</li>
+      <li><b>Темы:</b> запятые при однородных членах; безударные гласные в корне; запятая перед союзом «а»; парные согласные; мягкий знак (существительные с шипящими на конце, глаголы).</li>
+      <li><b>ФГОС НОО:</b> предметные результаты — раздел «Правописание»; метапредметные — регулятивные УУД (самопроверка по правилу и проверочным словам без страха ошибки) и познавательные УУД (анализ и восстановление деформированного текста).</li>
+      <li><b>Механика:</b> перетащи деталь со склада в пропуск (или нажми деталь → нажми пропуск). Лупа 🔍 даёт проверочное слово, но не готовый ответ. Наказаний нет: неверная деталь возвращается на склад.</li>
+      <li><b>Прогресс</b> сохраняется в браузере автоматически.</li>
+    </ul>
+    <div class="center">
+      <button class="btn ghosty small" id="resetBtn">🗑 Сбросить прогресс</button>
+      <button class="btn small" id="closeHelp">Понятно</button>
+    </div>
+  </div>
+</div>
+<script>
+/* ===== ДАННЫЕ ИГРЫ «Детективное агентство „Текст"» ===== */
+
+var PARTS = [
+  { icon: '🔩', name: 'Винтик' },
+  { icon: '🔧', name: 'Гаечка' },
+  { icon: '⚙️', name: 'Шестерёнка' },
+  { icon: '➰', name: 'Пружинка' },
+  { icon: '🔌', name: 'Проводок' },
+  { icon: '🔋', name: 'Батарейка' },
+  { icon: '💡', name: 'Лампочка' },
+  { icon: '📡', name: 'Антенна' },
+  { icon: '🖥️', name: 'Экранчик' },
+  { icon: '❤️', name: 'Энергоядро' }
+];
+
+var LEVELS = [
+  {
+    id: 1,
+    code: 'ДЕЛО № 1',
+    title: 'Сад и огород',
+    topic: 'Запятые при однородных членах',
+    intro: 'Ошибка-Невидимка стёр все запятые в отчёте кружка «Юный садовод». Восстанови их, пока дети не забыли, что растёт в саду!',
+    rule: 'Однородные члены предложения разделяются запятой. Перед одиночным союзом «и» запятая не ставится.',
+    segments: [
+      'В школьном саду росли яблони', 0, ' груши', 1,
+      ' сливы и вишни. Дети поливали грядки', 2, ' рыхлили землю', 3,
+      ' собирали урожай.'
+    ],
+    gaps: [
+      { answer: ',', hint: 'Однородные члены: яблони, груши… Между ними нужна запятая!' },
+      { answer: ',', hint: 'Перечисление продолжается — ставь запятую.' },
+      { answer: ',', hint: 'Однородные сказуемые: поливали, рыхлили…' },
+      { answer: ',', hint: 'Однородные члены без союза «и» — запятая обязательна!', viz: true }
+    ],
+    chips: [',', '!', ',', '?', ',', ','],
+    parts: [0, 1],
+    scheme: {
+      title: 'Схема: однородные члены',
+      html: '<span class="tok">🍎 яблони</span><span class="comma">,</span><span class="tok">🍐 груши</span><span class="comma">,</span><span class="tok">🌿 сливы</span> <b>и</b> <span class="tok">🍒 вишни</span><div class="scheme-note">Между однородными членами — <span class="comma">запятая</span>; перед одиночным союзом «и» запятая не нужна.</div>'
+    },
+    doneText: 'Запятые вернулись на свои места, и отчёт кружка «Юный садовод» снова читается!'
+  },
+  {
+    id: 2,
+    code: 'ДЕЛО № 2',
+    title: 'Погода',
+    topic: 'Безударная гласная + запятая перед «а»',
+    intro: 'Из школьной сводки погоды пропали буква и запятая. «Без проверочного слова вам не справиться!» — хихикает Ошибка-Невидимка.',
+    rule: 'В безударном слоге пиши ту гласную, которая слышится под ударением в проверочном слове (мОрозы). Перед союзом «а» всегда ставится запятая!',
+    segments: [
+      'Не м', 0, 'розный', 1, ' а сильный ветер дул на улице.'
+    ],
+    gaps: [
+      { answer: 'о', hint: 'Проверочное слово: мОрозы. Какой гласный звук слышится под ударением?' },
+      { answer: ',', hint: 'Перед союзом «а» всегда ставится запятая!', viz: true }
+    ],
+    chips: ['о', 'а', ',', 'е', '-'],
+    parts: [2, 3],
+    scheme: {
+      title: 'Схема: «не морозный, а сильный»',
+      html: '<span class="tok">❄️ морозный</span> <span class="arr">⇢</span><span class="comma">,</span><span class="bigA">а</span><span class="arr">⇠</span> <span class="tok">💨 сильный</span><div class="scheme-note">Два разных признака разделяют <span class="comma">запятая</span> и союз <b>«а»</b>. Гласный в корне проверь: <b>мОрозы</b>.</div>'
+    },
+    doneText: 'Сводка погоды восстановлена! Гласный проверен словом «мОрозы», а перед союзом «а» стоит запятая.'
+  },
+  {
+    id: 3,
+    code: 'ДЕЛО № 3',
+    title: 'Ночная смена',
+    topic: 'Парные согласные и мягкий знак',
+    intro: 'Ночной рапорт парковика весь в дырах: из слов сбежали согласные и мягкие знаки. Проверяй каждую деталь словами-помощниками!',
+    rule: 'Парную согласную на конце или в середине слова проверяй словом, где после неё стоит гласный: дуб — дубы. Мягкий знак пишется у существительных ж. р. с шипящим на конце (ночь) и в глаголах (что делал? — трудился).',
+    segments: [
+      'Наступила ноч', 0, '. Спит старый ду', 1,
+      ', дремлет голу', 2, 'ь. Завтра в парке будет новый ден', 3, '!'
+    ],
+    gaps: [
+      { answer: 'ь', hint: 'Ночь — существительное ж. р. с шипящим на конце. Нужен мягкий знак!' },
+      { answer: 'б', hint: 'Проверочное слово: дубЫ' },
+      { answer: 'б', hint: 'Проверочное слово: голубИ' },
+      { answer: 'ь', hint: 'Мягкий знак показывает мягкость звука [н]: день.' }
+    ],
+    chips: ['ь', 'ъ', 'б', 'п', 'б', 'т', 'ь'],
+    parts: [4, 5, 6],
+    scheme: {
+      title: 'Слова-помощники',
+      html: '<span class="tok">дуб</span> → <span class="tok">дуб<span class="str">Ы</span></span> &nbsp;&nbsp; <span class="tok">голубь</span> → <span class="tok">голуб<span class="str">И</span></span><br><span class="tok">ноч<span class="str">ь</span></span> — ж. р., шипящий на конце → <b>ь</b><div class="scheme-note">Сомневаешься — измени слово так, чтобы после согласной стояла гласная!</div>'
+    },
+    doneText: 'Ночной рапорт снова читается: парные согласные проверены словами-помощниками, мягкие знаки на месте!'
+  },
+  {
+    id: 4,
+    code: 'ДЕЛО № 4',
+    title: 'Битва с боссом',
+    topic: 'Все правила сразу!',
+    boss: true,
+    intro: 'Ошибка-Невидимка спрятался в докладе о бобрах и лично охраняет каждый пробел. Почини весь текст сразу — и босс сдастся!',
+    rule: 'Вспомни всё: безударную гласную проверяй ударением (лЕс), парную согласную — гласной после (бОбры), мягкий знак — родом слова и вопросом к глаголу, а при однородных членах ставь запятые.',
+    segments: [
+      'В л', 0, 'су, у л', 1, 'сного ручья, жил м', 2, 'олодой боб', 3,
+      'р. Он собрал ветки', 4, ' кору', 5,
+      ' мох и камыши и построил', 6, 'лотину. Всю ноч', 7, ' бобр трудил', 8, 'ся.'
+    ],
+    gaps: [
+      { answer: 'е', hint: 'Проверочное слово: лЕс' },
+      { answer: 'е', hint: 'Проверочное слово: лЕс' },
+      { answer: 'о', hint: 'Проверочное слово: мОлодость' },
+      { answer: 'р', hint: 'Проверочное слово: бОбры' },
+      { answer: ',', hint: 'Однородные члены перечисляются — нужна запятая.' },
+      { answer: ',', hint: 'Однородные члены перечисляются — нужна запятая.' },
+      { answer: 'п', hint: 'Проверочное слово: плОты' },
+      { answer: 'ь', hint: 'Ночь — существительное ж. р. с шипящим на конце → ь' },
+      { answer: 'ь', hint: 'Что делал? трудился — ь пишется, как и в вопросе «что делал?»' }
+    ],
+    chips: ['е', 'и', 'о', 'а', 'е', 'р', ',', 'б', ',', 'п', 'ь', 'ъ', 'ь', '!'],
+    parts: [7, 8, 9],
+    scheme: {
+      title: 'Все ловушки босса разоблачены!',
+      html: '<span class="tok">лЕс</span> · <span class="tok">мОлодость</span> · <span class="tok">бОбры</span> · <span class="tok">плОты</span><br><span class="tok">ноч<span class="str">ь</span></span> → <b>ь</b> &nbsp; <span class="tok">трудил<span class="str">ь</span>ся</span> → <b>ь</b> &nbsp; <span class="comma">,</span> — при однородных членах<div class="scheme-note"><b>Ошибка-Невидимка повержен! 🎉</b></div>'
+    },
+    doneText: 'Доклад о бобрах спасён! Ошибка-Невидимка сдаётся и убегает за горизонт.'
+  }
+];
+</script>
+<script>
+/* ===== ДВИЖОК ИГРЫ ===== */
+(function () {
+  'use strict';
+
+  var $ = function (s) { return document.querySelector(s); };
+  var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+
+  /* ---------- состояние и сохранение ---------- */
+  var SAVE_KEY = 'detTextGame_v1';
+  var state = { done: [], parts: [], name: '' };
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(SAVE_KEY);
+      if (raw) {
+        var d = JSON.parse(raw);
+        if (d && typeof d === 'object') {
+          state.done = Array.isArray(d.done) ? d.done : [];
+          state.parts = Array.isArray(d.parts) ? d.parts : [];
+          state.name = typeof d.name === 'string' ? d.name : '';
+        }
+      }
+    } catch (e) {}
+  }
+  function save() {
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  /* ---------- звук (WebAudio, без файлов) ---------- */
+  var Snd = {
+    on: true, ctx: null,
+    ensure: function () {
+      if (!this.ctx) {
+        try {
+          var AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        } catch (e) {}
+      }
+      if (this.ctx && this.ctx.state === 'suspended') { this.ctx.resume(); }
+    },
+    tone: function (f, t0, dur, type, vol) {
+      if (!this.on || !this.ctx) return;
+      try {
+        var o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = type || 'sine'; o.frequency.value = f;
+        o.connect(g); g.connect(this.ctx.destination);
+        var t = this.ctx.currentTime + (t0 || 0);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.linearRampToValueAtTime(vol || 0.12, t + 0.015);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.start(t); o.stop(t + dur + 0.05);
+      } catch (e) {}
+    },
+    click: function () { this.ensure(); this.tone(700, 0, 0.06, 'triangle', 0.07); },
+    correct: function () { this.ensure(); this.tone(659, 0, 0.12, 'sine', 0.13); this.tone(988, 0.09, 0.2, 'sine', 0.11); },
+    wrong: function () { this.ensure(); this.tone(230, 0, 0.15, 'sawtooth', 0.05); this.tone(180, 0.11, 0.2, 'sawtooth', 0.045); },
+    win: function () { this.ensure(); [523, 659, 784, 1047].forEach(function (f, i) { Snd.tone(f, i * 0.12, 0.22, 'sine', 0.12); }); },
+    final: function () { this.ensure(); [523, 659, 784, 1047, 784, 1047, 1319].forEach(function (f, i) { Snd.tone(f, i * 0.14, 0.3, 'sine', 0.12); }); }
+  };
+
+  /* ---------- фразы ---------- */
+  var GOODS = ['Есть! Деталь встала на место ⚙️', 'Точно! Так держать, детектив!', 'Идеально! Бип доволен 🤖', 'Отличная работа — текст оживает!'];
+  var WRONGS = ['Почти! Проверь ещё раз 🔍', 'Эта деталь не подходит… Попробуй другую!', 'Ошибка-Невидимка снова пошутил. Не сдавайся!', 'Хм… Загляни в правило-напоминание выше!'];
+  var TAUNTS = ['Ха-ха! Не выйдет!', 'Мой текст — не трогать!', 'Ещё чуть-чуть — и моя победа!', 'Вы никогда не почините доклад!'];
+  var RETURNS = ['Деталь вернулась на склад.', 'Мимо! Деталь снова на складе.'];
+
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function setStatus(msg, cls) {
+    var s = $('#status');
+    s.textContent = msg;
+    s.className = 'statusbar' + (cls ? ' ' + cls : '');
+  }
+
+  /* ---------- переменные игры ---------- */
+  var currentLevel = 0, completing = false, selectedChip = null, drag = null, hintEl = null;
+
+  /* ---------- шапка ---------- */
+  function renderHeader() {
+    var dots = $('#dots'); dots.innerHTML = '';
+    LEVELS.forEach(function (lv, i) {
+      var d = document.createElement('div');
+      d.className = 'dot' + (state.done.indexOf(lv.id) >= 0 ? ' done' : (i === currentLevel && $('#screen-level').classList.contains('active') ? ' cur' : ''));
+      d.title = lv.code + ' — ' + lv.title;
+      dots.appendChild(d);
+    });
+    var slots = $('#slots'); slots.innerHTML = '';
+    PARTS.forEach(function (p, i) {
+      var s = document.createElement('div');
+      s.className = 'slot' + (state.parts.indexOf(i) >= 0 ? ' full' : '');
+      s.textContent = state.parts.indexOf(i) >= 0 ? p.icon : '';
+      s.title = p.name;
+      slots.appendChild(s);
+    });
+    $('#partsCount').textContent = state.parts.length + '/10';
+  }
+
+  function showScreen(id) {
+    $$('.screen').forEach(function (s) { s.classList.remove('active'); });
+    $(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function firstUnfinished() {
+    for (var i = 0; i < LEVELS.length; i++) {
+      if (state.done.indexOf(LEVELS[i].id) < 0) return i;
+    }
+    return 0;
+  }
+
+  function clearSelection() {
+    if (selectedChip) { selectedChip.classList.remove('selected'); selectedChip = null; }
+  }
+
+  /* ---------- подсказка-лупа ---------- */
+  function closeHint() { if (hintEl) { hintEl.remove(); hintEl = null; } }
+
+  function showHint(gapEl) {
+    closeHint();
+    var lv = LEVELS[currentLevel];
+    var gi = parseInt(gapEl.dataset.gap, 10);
+    hintEl = document.createElement('div');
+    hintEl.className = 'hintpop';
+    hintEl.innerHTML = '<b>🔍 Лупа детектива</b><div>' + lv.gaps[gi].hint + '</div>';
+    document.body.appendChild(hintEl);
+    var r = gapEl.getBoundingClientRect();
+    var hr = hintEl.getBoundingClientRect();
+    var top = r.bottom + 8;
+    if (top + hr.height > window.innerHeight - 10) { top = Math.max(8, r.top - hr.height - 8); }
+    var left = r.left + r.width / 2 - hr.width / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - hr.width - 8));
+    hintEl.style.top = top + 'px';
+    hintEl.style.left = left + 'px';
+    Snd.click();
+    setTimeout(function () {
+      document.addEventListener('pointerdown', outsideHint, { once: true });
+    }, 10);
+  }
+  function outsideHint(e) {
+    if (hintEl && !hintEl.contains(e.target)) closeHint();
+    else if (hintEl) { document.addEventListener('pointerdown', outsideHint, { once: true }); }
+  }
+
+  /* ---------- построение уровня ---------- */
+  function makeGap(gi) {
+    var g = document.createElement('span');
+    g.className = 'gap';
+    g.dataset.gap = String(gi);
+    var t = document.createElement('span'); t.className = 'g-text';
+    var l = document.createElement('span'); l.className = 'lupa'; l.textContent = '🔍'; l.title = 'Лупа: подсказка';
+    g.appendChild(t); g.appendChild(l);
+    g.addEventListener('click', onGapClick);
+    return g;
+  }
+
+  function onGapClick(e) {
+    var g = e.currentTarget;
+    closeHint();
+    if (g.classList.contains('filled')) { showHint(g); return; }
+    if (e.target && e.target.classList && e.target.classList.contains('lupa')) { showHint(g); return; }
+    if (selectedChip) { tryPlace(selectedChip, g); }
+    else { showHint(g); }
+  }
+
+  function startLevel(i) {
+    currentLevel = i; completing = false;
+    clearSelection(); closeHint();
+    $('#overlay').classList.remove('show');
+    var lv = LEVELS[i];
+    showScreen('#screen-level');
+    $('#caseCode').textContent = lv.code;
+    $('#caseTitle').textContent = lv.title;
+    $('#caseTopic').textContent = lv.topic;
+    $('#caseStory').textContent = lv.intro;
+    $('#ruleText').textContent = lv.rule;
+    var bl = $('#bossline');
+    bl.style.display = lv.boss ? 'flex' : 'none';
+    if (lv.boss) { $('#bossSay').textContent = 'Ха-ха! Этот текст — мой. Вам его не починить, детективы!'; }
+    $('#stamp').textContent = lv.boss ? 'ЗАХВАЧЕНО БОССОМ' : 'ИСПОРЧЕНО';
+    var rb = $('.rulebar'); if (rb) rb.open = true;
+
+    var pt = $('#paperText'); pt.innerHTML = '';
+    lv.segments.forEach(function (seg) {
+      if (typeof seg === 'number') { pt.appendChild(makeGap(seg)); }
+      else { pt.appendChild(document.createTextNode(seg)); }
+    });
+
+    var ch = $('#chips'); ch.innerHTML = '';
+    lv.chips.forEach(function (val) {
+      var c = document.createElement('div');
+      c.className = 'chip';
+      c.textContent = val;
+      c.addEventListener('pointerdown', chipDown);
+      ch.appendChild(c);
+    });
+
+    setStatus('Возьми деталь со склада и вставь её в пропуск текста. 💡');
+    renderHeader();
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- размещение детали ---------- */
+  function allFilled() {
+    var gs = $$('#paperText .gap');
+    return gs.length > 0 && gs.every(function (g) { return g.classList.contains('filled'); });
+  }
+
+  function tryPlace(chipEl, gapEl) {
+    var lv = LEVELS[currentLevel];
+    var gi = parseInt(gapEl.dataset.gap, 10);
+    var gap = lv.gaps[gi];
+    var val = chipEl.textContent;
+    closeHint();
+    if (val === gap.answer) {
+      chipEl.classList.add('used');
+      if (selectedChip === chipEl) clearSelection();
+      gapEl.classList.add('filled');
+      gapEl.querySelector('.g-text').textContent = val;
+      Snd.correct();
+      setStatus(pick(GOODS), 'good');
+      var willComplete = allFilled();
+      if (gap.viz && !willComplete) {
+        (function (sc) { setTimeout(function () { showScheme(sc, true); }, 400); })(lv.scheme);
+      }
+      if (willComplete) { setTimeout(completeLevel, 800); }
+    } else {
+      gapEl.classList.remove('wrongflash'); void gapEl.offsetWidth; gapEl.classList.add('wrongflash');
+      var p = $('#paper'); p.classList.remove('shake'); void p.offsetWidth; p.classList.add('shake');
+      Snd.wrong();
+      if (lv.boss) {
+        var t = pick(TAUNTS);
+        $('#bossSay').textContent = t;
+        setStatus('Ошибка-Невидимка: «' + t + '»', 'bad');
+      } else {
+        setStatus(pick(WRONGS), 'bad');
+      }
+    }
+  }
+
+  /* ---------- завершение уровня ---------- */
+  function completeLevel() {
+    if (completing) return;
+    var gs = $$('#paperText .gap');
+    if (!gs.every(function (g) { return g.classList.contains('filled'); })) return;
+    completing = true;
+    var lv = LEVELS[currentLevel];
+    $$('.schemetoast').forEach(function (t) { t.remove(); });
+    closeHint();
+    Snd.win();
+    if (state.done.indexOf(lv.id) < 0) {
+      state.done.push(lv.id);
+      lv.parts.forEach(function (pi) { if (state.parts.indexOf(pi) < 0) state.parts.push(pi); });
+      save();
+    }
+    renderHeader();
+    var card = $('#overlayCard');
+    card.innerHTML = '<h2>✅ Дело закрыто!</h2>'
+      + '<div class="schemeTitle">' + lv.scheme.title + '</div>'
+      + '<div class="scheme">' + lv.scheme.html + '</div>'
+      + '<p class="donetext">' + lv.doneText + '</p>'
+      + '<div class="partsfly">' + lv.parts.map(function (pi, k) {
+          return '<div class="pf" style="animation-delay:' + (0.15 * k + 0.15).toFixed(2) + 's" title="' + PARTS[pi].name + '">' + PARTS[pi].icon + '</div>';
+        }).join('') + '</div>'
+      + '<p class="partsnote">' + lv.parts.map(function (pi) { return PARTS[pi].name; }).join(' · ')
+        + ' → у Бипа ' + state.parts.length + '/10 деталей</p>'
+      + '<button class="btn" id="nextBtn">' + (currentLevel < LEVELS.length - 1 ? 'Следующее дело →' : 'Финал! 🎉') + '</button>';
+    $('#overlay').classList.add('show');
+    if (lv.boss) { confetti(90); Snd.final(); }
+    $('#nextBtn').onclick = function () {
+      Snd.click();
+      $('#overlay').classList.remove('show');
+      completing = false;
+      if (currentLevel < LEVELS.length - 1) { startLevel(currentLevel + 1); }
+      else { showFinal(); }
+    };
+  }
+
+  /* ---------- схема-визуализация правила ---------- */
+  function showScheme(scheme, temp) {
+    var t = document.createElement('div');
+    t.className = 'schemetoast';
+    t.innerHTML = '<h4>📐 ' + scheme.title + '</h4><div class="scheme">' + scheme.html + '</div>';
+    document.body.appendChild(t);
+    if (temp) {
+      setTimeout(function () { t.classList.add('bye'); setTimeout(function () { t.remove(); }, 500); }, 2800);
+    } else {
+      var b = document.createElement('button');
+      b.className = 'btn small'; b.textContent = 'Продолжить';
+      b.onclick = function () { t.remove(); };
+      t.appendChild(b);
+    }
+  }
+
+  /* ---------- финал ---------- */
+  function showFinal() {
+    showScreen('#screen-final');
+    renderHeader();
+    confetti(120);
+    Snd.final();
+    $('#certDate').textContent = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+    var rs = $('#robotSlots'); rs.innerHTML = '';
+    PARTS.forEach(function (p) {
+      var s = document.createElement('span'); s.textContent = p.icon; s.title = p.name; rs.appendChild(s);
+    });
+    var ni = $('#nameInput');
+    ni.value = state.name || '';
+    $('#certName').textContent = state.name || 'Детектив';
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- конфетти ---------- */
+  function confetti(n) {
+    var colors = ['#ffc93c', '#ff6b6b', '#27c46f', '#54a0ff', '#c56cf0'];
+    for (var i = 0; i < n; i++) {
+      (function (i) {
+        var p = document.createElement('div');
+        p.className = 'confetti-piece';
+        p.style.left = Math.random() * 100 + 'vw';
+        p.style.background = colors[i % colors.length];
+        p.style.animationDuration = (2.2 + Math.random() * 1.6) + 's';
+        p.style.animationDelay = (Math.random() * 0.5) + 's';
+        p.style.width = (6 + Math.random() * 8) + 'px';
+        p.style.height = (10 + Math.random() * 10) + 'px';
+        document.body.appendChild(p);
+        setTimeout(function () { p.remove(); }, 4800);
+      })(i);
+    }
+  }
+
+  /* ---------- перетаскивание (мышь + сенсорные экраны) ---------- */
+  function chipDown(e) {
+    if (drag) return;
+    var c = e.currentTarget;
+    if (c.classList.contains('used')) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
+    Snd.click();
+    var r = c.getBoundingClientRect();
+    drag = { chip: c, sx: e.clientX, sy: e.clientY, ox: r.left, oy: r.top, moved: false, ghost: null, id: e.pointerId };
+    try { c.setPointerCapture(e.pointerId); } catch (err) {}
+    document.addEventListener('pointermove', chipMove);
+    document.addEventListener('pointerup', chipUp);
+    document.addEventListener('pointercancel', chipUp);
+  }
+
+  function chipMove(e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+    if (!drag.moved && Math.hypot(dx, dy) > 7) {
+      drag.moved = true;
+      clearSelection(); closeHint();
+      var g = document.createElement('div');
+      g.className = 'ghost';
+      g.textContent = drag.chip.textContent;
+      g.style.left = e.clientX + 'px';
+      g.style.top = e.clientY + 'px';
+      document.body.appendChild(g);
+      drag.ghost = g;
+      drag.chip.classList.add('dragging');
+    }
+    if (drag.moved) {
+      drag.ghost.style.left = e.clientX + 'px';
+      drag.ghost.style.top = e.clientY + 'px';
+      var el = document.elementFromPoint(e.clientX, e.clientY);
+      var gap = el && el.closest ? el.closest('.gap') : null;
+      $$('.gap.hover').forEach(function (x) { x.classList.remove('hover'); });
+      if (gap && !gap.classList.contains('filled')) { gap.classList.add('hover'); }
+      if (e.cancelable) e.preventDefault();
+    }
+  }
+
+  function chipUp(e) {
+    if (!drag) return;
+    if (drag.id !== undefined && e.pointerId !== undefined && e.pointerId !== drag.id) return;
+    var d = drag;
+    drag = null;
+    document.removeEventListener('pointermove', chipMove);
+    document.removeEventListener('pointerup', chipUp);
+    document.removeEventListener('pointercancel', chipUp);
+    $$('.gap.hover').forEach(function (x) { x.classList.remove('hover'); });
+    var chipEl = d.chip;
+    if (!d.moved) {
+      /* это был тап — выделяем деталь */
+      if (selectedChip === chipEl) {
+        clearSelection();
+        setStatus('Возьми деталь со склада и вставь её в пропуск текста. 💡');
+      } else {
+        clearSelection();
+        selectedChip = chipEl;
+        chipEl.classList.add('selected');
+        setStatus('Деталь выбрана! Теперь нажми на пропуск в тексте.');
+      }
+      return;
+    }
+    chipEl.classList.remove('dragging');
+    if (d.ghost) d.ghost.remove();
+    var el = document.elementFromPoint(e.clientX, e.clientY);
+    var gap = el && el.closest ? el.closest('.gap') : null;
+    if (gap && !gap.classList.contains('filled')) {
+      tryPlace(chipEl, gap);
+    } else {
+      setStatus(pick(RETURNS));
+    }
+  }
+
+  /* ---------- тестовый доступ (для автопроверки) ---------- */
+  function fillAll() {
+    var guard = 0;
+    while (guard < 60) {
+      var gs = $$('#paperText .gap');
+      var idx = -1;
+      for (var i = 0; i < gs.length; i++) {
+        if (!gs[i].classList.contains('filled')) { idx = i; break; }
+      }
+      if (idx < 0) break;
+      var lv = LEVELS[currentLevel];
+      var chipEl = $$('#chips .chip').filter(function (c) {
+        return !c.classList.contains('used') && c.textContent === lv.gaps[idx].answer;
+      })[0];
+      if (!chipEl) break;
+      tryPlace(chipEl, gs[idx]);
+      guard++;
+    }
+  }
+
+  /* ---------- инициализация ---------- */
+  function updateIntroBtn() {
+    var b = $('#startBtn');
+    if (state.done.length > 0 || state.parts.length > 0) {
+      b.textContent = '▶️ Продолжить расследование';
+    } else {
+      b.textContent = '🔍 Начать расследование';
+    }
+  }
+  function loadSound() {
+    try { Snd.on = localStorage.getItem('detTextSound') !== '0'; } catch (e) {}
+  }
+  function renderSoundBtn() { $('#sndBtn').textContent = Snd.on ? '🔊' : '🔇'; }
+
+  load();
+  loadSound();
+  renderSoundBtn();
+  renderHeader();
+  updateIntroBtn();
+
+  $('#startBtn').onclick = function () { Snd.click(); startLevel(firstUnfinished()); };
+  $('#toMenuBtn').onclick = function () { Snd.click(); showScreen('#screen-intro'); renderHeader(); updateIntroBtn(); };
+  $('#sndBtn').onclick = function () {
+    Snd.on = !Snd.on;
+    try { localStorage.setItem('detTextSound', Snd.on ? '1' : '0'); } catch (e) {}
+    renderSoundBtn();
+    if (Snd.on) Snd.click();
+  };
+  $('#helpBtn').onclick = function () { Snd.click(); $('#helpOverlay').classList.add('show'); };
+  $('#closeHelp').onclick = function () { $('#helpOverlay').classList.remove('show'); };
+  $('#helpOverlay').addEventListener('click', function (e) {
+    if (e.target === this) this.classList.remove('show');
+  });
+  $('#resetBtn').onclick = function () {
+    if (confirm('Сбросить весь прогресс? Открытые дела и детали обнулятся.')) {
+      state.done = []; state.parts = []; save();
+      renderHeader(); updateIntroBtn();
+      $('#helpOverlay').classList.remove('show');
+      showScreen('#screen-intro');
+    }
+  };
+  $('#printBtn').onclick = function () { window.print(); };
+  $('#againBtn').onclick = function () {
+    if (confirm('Начать новое расследование? Прогресс соберётся заново.')) {
+      state.done = []; state.parts = []; save();
+      renderHeader();
+      startLevel(0);
+    }
+  };
+  $('#nameInput').addEventListener('input', function () {
+    state.name = this.value;
+    $('#certName').textContent = this.value || 'Детектив';
+    save();
+  });
+
+  document.addEventListener('pointerdown', function () { Snd.ensure(); }, { once: true });
+  document.addEventListener('contextmenu', function (e) {
+    if (e.target.closest && e.target.closest('.chip')) e.preventDefault();
+  });
+  window.addEventListener('resize', closeHint);
+  window.addEventListener('error', function (e) {
+    (window.__errs = window.__errs || []).push(String(e.message));
+  });
+
+  /* тестовый API */
+  window.DT = {
+    LEVELS: LEVELS,
+    PARTS: PARTS,
+    startLevel: startLevel,
+    fillAll: fillAll,
+    next: function () { var b = $('#nextBtn'); if (b) b.click(); },
+    info: function () {
+      return {
+        screen: document.querySelector('.screen.active').id,
+        level: currentLevel,
+        gaps: $$('#paperText .gap').map(function (g) { return g.classList.contains('filled'); }),
+        parts: state.parts.length,
+        done: state.done.slice()
+      };
+    }
+  };
+})();
+</script>
+</body></html>
